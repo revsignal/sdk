@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Tagging SDK - Example</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #333; }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 10px 5px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .button.secondary {
+      background: #6c757d;
+    }
+    .button.secondary:hover {
+      background: #545b62;
+    }
+    .status {
+      padding: 15px;
+      margin: 20px 0;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Agentic Tagging SDK - V1 Demo</h1>
+  
+  <div class="status">
+    <strong>Status:</strong> <span id="status">Initializing...</span>
+  </div>
+
+  <h2>Test Interactions</h2>
+  <p>Click these buttons to generate tracked events:</p>
+  
+  <button class="button" onclick="trackCustomEvent()">Track Custom Event</button>
+  <button class="button secondary" onclick="trackPageView()">Track Page View</button>
+  <a href="#" class="button" onclick="trackLinkClick(event)">Track Link Click</a>
+
+  <h2>User Identification</h2>
+  <div class="form-group">
+    <label for="userId">User ID:</label>
+    <input type="text" id="userId" placeholder="user-123" value="user-123">
+  </div>
+  <button class="button" onclick="identifyUser()">Identify User</button>
+
+  <h2>Debug Info</h2>
+  <div class="status">
+    <div id="debug-info">Loading...</div>
+  </div>
+
+  <!-- Load the SDK -->
+  <script src="dist/agent.js"></script>
+  
+  <script>
+    // Initialize the SDK
+    Agent.init({
+      writeKey: 'demo-write-key',
+      siteId: 'demo-site',
+      endpoint: 'http://localhost:3000',
+      debug: true
+    }).then(() => {
+      document.getElementById('status').textContent = '✅ SDK Initialized';
+      updateDebugInfo();
+    }).catch((error) => {
+      document.getElementById('status').textContent = '❌ Failed to initialize: ' + error.message;
+    });
+
+    // Track custom event
+    function trackCustomEvent() {
+      Agent.track('button_clicked', {
+        button_name: 'Custom Event',
+        timestamp: new Date().toISOString()
+      });
+      alert('Custom event tracked! Check your browser console and backend logs.');
+    }
+
+    // Track page view
+    function trackPageView() {
+      Agent.page('Demo Page', {
+        section: 'test',
+        timestamp: new Date().toISOString()
+      });
+      alert('Page view tracked! Check your browser console and backend logs.');
+    }
+
+    // Track link click
+    function trackLinkClick(event) {
+      event.preventDefault();
+      Agent.track('link_clicked', {
+        link_text: 'Track Link Click',
+        timestamp: new Date().toISOString()
+      });
+      alert('Link click tracked! Check your browser console and backend logs.');
+    }
+
+    // Identify user
+    function identifyUser() {
+      const userId = document.getElementById('userId').value;
+      Agent.identify(userId, {
+        email: userId + '@example.com',
+        name: 'Demo User',
+        timestamp: new Date().toISOString()
+      });
+      alert('User identified as: ' + userId);
+      updateDebugInfo();
+    }
+
+    // Update debug info
+    function updateDebugInfo() {
+      if (window.__Agent) {
+        const ids = window.__Agent.getIds();
+        document.getElementById('debug-info').innerHTML = `
+          <strong>Anonymous ID:</strong> ${ids.anonymousId}<br>
+          <strong>Session ID:</strong> ${ids.sessionId}<br>
+          <strong>User ID:</strong> ${ids.userId || '(not set)'}<br>
+          <strong>Pageview ID:</strong> ${ids.pageviewId}
+        `;
+      }
+    }
+
+    // Update debug info every 2 seconds
+    setInterval(updateDebugInfo, 2000);
+  </script>
+</body>
+</html>
+
